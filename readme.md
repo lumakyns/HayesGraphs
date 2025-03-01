@@ -11,10 +11,10 @@ This repository contains some graph algorithms.
 - Rest of lines: A directed edge between two numbered vertices [0, N-1], separated by a single space
 
 EG.
-3
-0 1
-0 2
-1 2
+3   <br/>
+0 1 <br/>
+0 2 <br/>
+1 2 <br/>
 
 ### Notice ###
 - Due to possibly dealing with large amounts of data, and for speed, algorithms are implemented without recursion.
