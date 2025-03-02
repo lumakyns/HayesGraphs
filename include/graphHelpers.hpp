@@ -13,11 +13,11 @@
 // File Processing
 std::vector<std::unordered_set<int>> filepathToGraph(const std::string& path);
 
-// Connected Components
+// Graph Algorithms
 std::vector<std::vector<int>> findConnected(const std::vector<std::unordered_set<int>>& graph);
-
-// Strongly Connected Components
 std::vector<std::vector<int>> findStronglyConnected(const std::vector<std::unordered_set<int>>& graph);
-
-// Vertex Degrees
+std::pair<int, int> graphlet3(const std::vector<std::unordered_set<int>>& graph);
 std::pair<std::vector<int>, std::vector<int>> inoutDegrees(const std::vector<std::unordered_set<int>>& graph);
+
+// Helpers
+std::vector<std::unordered_set<int>> toUndirected(const std::vector<std::unordered_set<int>>& graph);

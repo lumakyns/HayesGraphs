@@ -1,6 +1,6 @@
 #include "graphHelpers.hpp"
 
-// Parses a file (given by `const std::string& path`) and turns it into a graph.
+// Parses a file (given by `const std::string& path`) and turns it into a digraph.
 std::vector<std::unordered_set<int>> filepathToGraph(const std::string& path) {
     
     // Opening file
@@ -32,17 +32,9 @@ std::vector<std::unordered_set<int>> filepathToGraph(const std::string& path) {
     return graph;
 }
 
-// Finds connected components in a graph using a regular DFS algorithm
+// Finds connected components in a directed graph using a regular DFS algorithm
 std::vector<std::vector<int>> findConnected(const std::vector<std::unordered_set<int>>& graph) {
-    std::vector<std::unordered_set<int>> undirectedGraph(graph.size());
-
-    // Turn digraph into undirected graph
-    for (int from = 0; from < graph.size(); ++from) {
-        for (const int to : graph[from]) {
-            undirectedGraph[from].insert(to);
-            undirectedGraph[to].insert(from);
-        }
-    }
+    std::vector<std::unordered_set<int>> undirectedGraph = toUndirected(graph);
 
     // Find all connected components
     std::vector<std::vector<int>> connectedComponents;
@@ -74,7 +66,7 @@ std::vector<std::vector<int>> findConnected(const std::vector<std::unordered_set
     return connectedComponents;
 }
 
-// Finds strongly connected components in a graph using Tarjan's algorithm
+// Finds strongly connected components in a directed graph using Tarjan's algorithm
 std::vector<std::vector<int>> findStronglyConnected(const std::vector<std::unordered_set<int>>& graph) {
     
     // Run Tarjan's algorithm
@@ -152,9 +144,41 @@ std::vector<std::vector<int>> findStronglyConnected(const std::vector<std::unord
     return stronglyConnectedComponents;
 }
 
-// Returns a histogram of the in-out degrees for the graph.
-// pair.first  = in degrees
-// pair.second = out degrees
+// Finds size-3 graphlets in a graph, treating the graph as undirected.
+// There are two types of size-3 graph:
+//   type 1 (pair.first) : Line graphlet     (A-B-C)
+//   type 2 (pair.second): Triangle graphlet (A-B-C-A)
+std::pair<int, int> graphlet3(const std::vector<std::unordered_set<int>>& graph) {
+    std::vector<std::unordered_set<int>> undirectedGraph = toUndirected(graph);
+
+    // To not repeat graphlets, we iterate through each node, treating it as the 'center' of the graphlet.
+    // (We only form graphlets where one node is smaller, and one node is bigger)
+    // It can be shown this prevents repetitions, and counts all size-3 graphlets
+    int lines     = 0;
+    int triangles = 0;
+    for (int vert = 0; vert < graph.size(); ++vert) {
+        // Smaller than vert
+        for (const int lhs : undirectedGraph[vert]) {
+            if (lhs >= vert) continue;
+
+            // Bigger than vert
+            for (const int rhs : undirectedGraph[vert]) {
+                if (rhs <= vert) continue;
+    
+                // Count accordingly
+                ++lines;
+                if (undirectedGraph[lhs].contains(rhs)) ++triangles;
+            }
+        }
+    }
+
+    return {lines, triangles};
+}
+
+// Returns a histogram of the degrees for the graph.
+// Values depend on whether graph is directed or not.
+// pair.first  = in degrees (bucketized)
+// pair.second = out degrees (bucketized)
 std::pair<std::vector<int>, std::vector<int>> inoutDegrees(const std::vector<std::unordered_set<int>>& graph) {
     std::vector<int> ins;
     std::vector<int> outs;
@@ -165,7 +189,7 @@ std::pair<std::vector<int>, std::vector<int>> inoutDegrees(const std::vector<std
     // Get values
     for (int vert = 0; vert < graph.size(); ++vert) {
         outdegPerVertex[vert] += graph[vert].size();
-
+            
         for (const int neighbor : graph[vert]) {
             ++indegPerVertex[neighbor];
         }
@@ -186,4 +210,19 @@ std::pair<std::vector<int>, std::vector<int>> inoutDegrees(const std::vector<std
     while (outs.size() < maxLen) outs.push_back(0);
 
     return {ins, outs};
+}
+
+// Helper: Turns a digraph into an undirected graph.
+std::vector<std::unordered_set<int>> toUndirected(const std::vector<std::unordered_set<int>>& graph) {
+    std::vector<std::unordered_set<int>> undirectedGraph(graph.size());
+
+    // Turn digraph into undirected graph
+    for (int from = 0; from < graph.size(); ++from) {
+        for (const int to : graph[from]) {
+            undirectedGraph[from].insert(to);
+            undirectedGraph[to].insert(from);
+        }
+    }
+
+    return undirectedGraph;
 }
