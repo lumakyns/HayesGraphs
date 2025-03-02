@@ -1,6 +1,13 @@
 # Graph Algorithms for Prof. Hayes #
 This repository contains some graph algorithms.
 
+### Usage ###
+From the root workspace directory:
+```
+make
+./bin/main.exe
+```
+
 ### Algorithms available ###
 - Finding Connected Components
 - Finding Strongly Connected Components (Tarjan's)
