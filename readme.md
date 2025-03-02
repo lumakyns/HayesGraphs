@@ -4,7 +4,7 @@ This repository contains some graph algorithms.
 ### Algorithms available ###
 - Finding Connected Components
 - Finding Strongly Connected Components (Tarjan's)
-- Graphlet finder (WIP)
+- Size 3 Graphlet finder
 
 ### Graph Format (in resources/graphs) ###
 - 1st line     : # of vertices in graph, N.
