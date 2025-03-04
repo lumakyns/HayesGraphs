@@ -25,20 +25,20 @@ int main() {
         data.undirectedIODegrees = inoutDegrees(toUndirected(graph));
 
         printMyData(data);
-        // exportMyData(data, newFileName, CSVPath);
+        // exportMyData(data, FolderPath);
     }
     
     return 0;
 }
 
 void printMyData(const DataResults& data) {
-    // Connected Components & Size-3 Graphlets
+    // Statistics
     std::cout << "**** " << data.fileName << " ****\n";
     std::cout << "  CC   : " << data.CCResults.size() << "\n";
     std::cout << "  SCC  : " << data.SCCResults.size() << "\n";
     std::cout << "  GR3  : " << "(Lines: " << data.size3graphlets.first << ") -- (Triangles : " << data.size3graphlets.second << ")" << "\n\n";
 
-    // Degree distributions
+    // Degrees
     std::cout << "  Degree distributions:\n";
     std::cout << "     ______ ______ ______\n";
     std::cout << "    |INdeg |OUTdeg|Undir |\n";
@@ -63,24 +63,49 @@ void printMyData(const DataResults& data) {
 
 void exportMyData(const DataResults& data, std::string CSVFolderPath) {
 
-    // Find filepath and create fiile
-    try std::filesystem::create_directories(CSVPath);
+    // Find and create folder
+    try {
+        std::filesystem::create_directories(CSVFolderPath);
+    }
 
     catch (const std::filesystem::filesystem_error& e) {
         std::cerr << "Failed to create directory: " << e.what() << "\n";
         return;
     }
     
-    std::filesystem::path fullPath = std::filesystem::path(CSVPath) / (newFileName + ".csv");
+    std::filesystem::path statsPath   = std::filesystem::path(CSVFolderPath) / (data.fileName + "_stats.csv");
+    std::filesystem::path degreesPath = std::filesystem::path(CSVFolderPath) / (data.fileName + "_degrees.csv");
     
-    std::ofstream file(fullPath);
-    if (!file.is_open()) {
-        std::cerr << "Could not open file: " << fullPath << std::endl;
-        return;
+    // Write statistics file
+    std::ofstream statsFile(statsPath);
+    if (!statsFile.is_open()) {
+        std::cerr << "Could not open file: " << statsPath << std::endl;
+        return; 
     }
-    
-    // Write to file
 
-    
-    file.close();
+    statsFile << "CC,SCC,GR3Lines,GR3Triangles\n";
+    statsFile << data.CCResults.size() << "," << data.SCCResults.size() << "," << data.size3graphlets.first << "," << data.size3graphlets.second << "\n";
+    statsFile.close();
+
+    // Write degrees file
+    std::ofstream degreeFile(degreesPath);
+    if (!degreeFile.is_open()) {
+        std::cerr << "Could not open file: " << degreesPath << std::endl;
+        return; 
+    }
+
+    degreeFile << "IN,OUT,UNDIR\n";
+    int maxLen = std::max(data.directedIODegrees.first.size(), data.undirectedIODegrees.first.size());
+    for (int id = 0; id < maxLen; ++id) {
+
+        if (id >= data.directedIODegrees.first.size()) degreeFile << "0" << ",";
+        else                                           degreeFile << data.directedIODegrees.first[id] << ",";
+
+        if (id >= data.directedIODegrees.second.size()) degreeFile << "0" << ",";
+        else                                            degreeFile << data.directedIODegrees.second[id] << ",";
+
+        if (id >= data.undirectedIODegrees.first.size()) degreeFile << "0" << "\n";
+        else                                             degreeFile << data.undirectedIODegrees.first[id] << "\n";
+    }
+    degreeFile.close();
 }

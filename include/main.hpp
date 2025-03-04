@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <iomanip>
+#include <filesystem>
 
 #include "graphHelpers.hpp"
 
@@ -17,5 +18,5 @@ struct DataResults {
 
 void printMyData(const DataResults& data);
 
-void exportMyData(const DataResults& data, std::string CSVFolderPath)
+void exportMyData(const DataResults& data, std::string CSVFolderPath);
 
